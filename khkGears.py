@@ -27,6 +27,15 @@ for url in urls:
 	for i in range(len(modules)):
 		element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'cds-attribute-value-list-sort_module')))
 		hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-sort_module').find_elements(By.TAG_NAME,'input')[i]).perform()
+		# Ensures every part is displayed on the list
+		#element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'loadmore-link')))
+		#while len(driver.find_elements(By.CLASS_NAME,'loadmore-link')) != 0:
+		#	element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'loadmore-link')))
+		#	hover.move_to_element(driver.find_elements(By.CLASS_NAME,'loadmore-link')[0]).click().perform()
+		
+		# Grabs and adds link to parts list
+		#for partName in driver.find_elements(By.TAG_NAME,'h2'):
+		#	parts.append(partName.find_elements(By.TAG_NAME,'a')[0].get_attribute('href'))
 
 	# Ensures every part is displayed on the list
 	element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'loadmore-link')))
