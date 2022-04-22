@@ -19,6 +19,7 @@ options.headless = True
 
 def grabParts(url, i, driver, teeth):
 	global parts
+	global urls
 	
 	driver.get(url)
 	hover = ActionChains(driver)
@@ -46,7 +47,7 @@ def grabParts(url, i, driver, teeth):
 
 	WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
 	hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')[i]).perform()
-	print("Tooth Progress: {:.2f}%".format(100*i/teeth)) # Shows Progress
+	print("Url {} Tooth Progress: {:.2f}%".format(urls.index(url)+1,100*i/teeth)) # Shows Progress
 
 # Gathers information from each part page and adds it to info list
 def grabContent(part, driver):
