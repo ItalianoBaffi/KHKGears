@@ -15,42 +15,92 @@ urls = ['https://www.khkgears.us/catalog/?cid=spur-gears','https://www.khkgears.
 parts = []
 info = [['Name','Bending Strength (N-m)','Surface Strength (N-m)','Pitch Diameter (mm)','Teeth','Weight (kg)','Bore (mm)','Price (1-9)','Price (10-24)','Price (25-49)','Price (50-99)','Price (100-249)']]
 options = Options()
-#options.headless = True
-driver = webdriver.Chrome('./chromedriver.exe', options = options)
-hover = ActionChains(driver)
-
+options.headless = True
+'''
 # Grabs links for each path from main spur/helical gear page
 for url in urls:
 	driver.get(url)
 	modules = driver.find_element(By.ID, 'cds-attribute-value-list-sort_module').find_elements(By.TAG_NAME,'input')
 	# Selects every module
 	for i in range(len(modules)):
-		element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'cds-attribute-value-list-sort_module')))
+		WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-sort_module')))
 		hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-sort_module').find_elements(By.TAG_NAME,'input')[i]).perform()
-		# Ensures every part is displayed on the list
-		#element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'loadmore-link')))
-		#while len(driver.find_elements(By.CLASS_NAME,'loadmore-link')) != 0:
-		#	element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'loadmore-link')))
-		#	hover.move_to_element(driver.find_elements(By.CLASS_NAME,'loadmore-link')[0]).click().perform()
+
+		WebDriverWait(driver,5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
+		teeth = driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')
+		for j in range(len(teeth)):
+			WebDriverWait(driver,5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
+			hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')[j]).perform()
+
+			WebDriverWait(driver,5).until(EC.presence_of_element_located((By.ID, 'cds-attribute-value-list-no_teeth')))
+			# Ensures every part is displayed on the list
+			try:
+				WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CLASS_NAME,'loadmore-link')))
+				while len(driver.find_elements(By.CLASS_NAME,'loadmore-link')) != 0:
+					hover.click(driver.find_elements(By.CLASS_NAME,'loadmore-link btn btn-default')[0]).perform()
+					try:
+						WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CLASS_NAME,'loadmore-link')))
+					except:
+						pass
+			except:
+				pass
 		
-		# Grabs and adds link to parts list
-		#for partName in driver.find_elements(By.TAG_NAME,'h2'):
-		#	parts.append(partName.find_elements(By.TAG_NAME,'a')[0].get_attribute('href'))
+			# Grabs and adds link to parts list
+			for partName in driver.find_elements(By.TAG_NAME,'h2'):
+				parts.append(partName.find_elements(By.TAG_NAME,'a')[0].get_attribute('href'))
 
-	# Ensures every part is displayed on the list
-	element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'loadmore-link')))
-	while len(driver.find_elements(By.CLASS_NAME,'loadmore-link')) != 0:
-		element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME,'loadmore-link')))
-		hover.move_to_element(driver.find_elements(By.CLASS_NAME,'loadmore-link')[0]).click().perform()
+			WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
+			hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')[j]).perform()
+			print("Module: {}: {}%, Teeth: {}: {}%".format(i,100*i/len(modules),j,100*j/len(teeth))) # Shows Progress
 
-	# Grabs and adds link to parts list
-	for partName in driver.find_elements(By.TAG_NAME,'h2'):
-		parts.append(partName.find_elements(By.TAG_NAME,'a')[0].get_attribute('href'))
+		WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-sort_module')))
+		hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-sort_module').find_elements(By.TAG_NAME,'input')[i]).perform()
+		'''
+def grabParts(url, driver):
+	global parts
+	
+	driver.get(url)
+	hover = ActionChains(driver)
+	modules = driver.find_element(By.ID, 'cds-attribute-value-list-sort_module').find_elements(By.TAG_NAME,'input')
+	# Selects every module
+	for i in range(len(modules)):
+		WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-sort_module')))
+		hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-sort_module').find_elements(By.TAG_NAME,'input')[i]).perform()
+
+		WebDriverWait(driver,5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
+		teeth = driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')
+		for j in range(len(teeth)):
+			WebDriverWait(driver,5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
+			hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')[j]).perform()
+
+			WebDriverWait(driver,5).until(EC.presence_of_element_located((By.ID, 'cds-attribute-value-list-no_teeth')))
+			# Ensures every part is displayed on the list
+			try:
+				WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CLASS_NAME,'loadmore-link')))
+				while len(driver.find_elements(By.CLASS_NAME,'loadmore-link')) != 0:
+					hover.click(driver.find_elements(By.CLASS_NAME,'loadmore-link btn btn-default')[0]).perform()
+					try:
+						WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CLASS_NAME,'loadmore-link')))
+					except:
+						pass
+			except:
+				pass
+		
+			# Grabs and adds link to parts list
+			for partName in driver.find_elements(By.TAG_NAME,'h2'):
+				parts.append(partName.find_elements(By.TAG_NAME,'a')[0].get_attribute('href'))
+
+			WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
+			hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')[j]).perform()
+			print("Module: {}: {}%, Teeth: {}: {}%".format(i,100*i/len(modules),j,100*j/len(teeth))) # Shows Progress
+
+		WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-sort_module')))
+		hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-sort_module').find_elements(By.TAG_NAME,'input')[i]).perform()
 
 # Gathers information from each part page and adds it to info list
-def grabContent(part):
-	global driver
+def grabContent(part, driver):
 	global info
+	global parts
 
 	driver.get(part)
 	temp = []
@@ -79,14 +129,25 @@ def grabContent(part):
 	# Adds list of information to main info list
 	info.append(temp)
 
-# Handles multithreading of pulling information
-ex = cf.ThreadPoolExecutor()
-ex.map(grabContent,parts)
+	print("Progress {}%".format(100*len(info)/len(parts))) # Shows Progress
 
-# Creates and writes information to file
-file =  open('./outputFiles/kgkGearsOutput '+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+'.csv','w+')
-file = csv.writer(file, 'w', encoding='utf-8', newline='')
-file.writerows(info)
-file.close()
 
-driver.close()
+if __name__ == "__main__":
+	# Handles multithreading of pulling information
+	drivers = [webdriver.Chrome(options=options) for _ in range(len(urls))]
+	prt = cf.ThreadPoolExecutor()
+	prt.map(grabParts,urls,drivers)
+
+	[driver.quit() for driver in drivers]
+
+	drivers = [webdriver.Chrome(options=options) for _ in range(len(parts))]
+	ex = cf.ThreadPoolExecutor()
+	ex.map(grabContent,parts,drivers)
+
+	[driver.quit() for driver in drivers]
+
+	# Creates and writes information to file
+	with open('./outputFiles/kgkGearsOutput '+datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")+'.csv','w+') as file:
+		file = csv.writer(file)
+		file.writerows(info)
+	print("Complete!")
