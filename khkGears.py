@@ -1,6 +1,5 @@
 import csv
 import datetime
-import time
 import concurrent.futures as cf
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -16,6 +15,7 @@ parts = []
 info = [['Name','Bending Strength (N-m)','Surface Strength (N-m)','Pitch Diameter (mm)','Teeth','Weight (kg)','Bore (mm)','Price (1-9)','Price (10-24)','Price (25-49)','Price (50-99)','Price (100-249)']]
 options = Options()
 options.headless = True
+options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
 def grabParts(url, i, driver, teeth):
 	global parts
@@ -47,7 +47,7 @@ def grabParts(url, i, driver, teeth):
 
 	WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, 'cds-attribute-value-list-no_teeth')))
 	hover.click(driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input')[i]).perform()
-	print("Url {} Tooth Progress: {:.2f}%".format(urls.index(url)+1,100*i/teeth)) # Shows Progress
+	print("Url {} Tooth Progress: {:.2f}%".format(urls.index(url)+1,100*(i+1)/teeth)) # Shows Progress
 
 # Gathers information from each part page and adds it to info list
 def grabContent(part, driver):
@@ -73,7 +73,7 @@ def grabContent(part, driver):
 			bore = label.find_element(By.XPATH,'//following-sibling::div').get_attribute('textContent')
 
 	# Creates a list of all the information pulled
-	temp = ['<a href="'+part+'">'+driver.find_elements(By.CLASS_NAME,'productName')[0].get_attribute('textContent').spit('\n\t\t\t\t\t\t\t')[1]+'</a>',bending,surface,pitch,teeth,weight,bore,
+	temp = ['<a href="'+part+'">'+driver.find_elements(By.CLASS_NAME,'productName')[0].get_attribute('textContent').split('\n\t\t\t\t\t\t\t')[1]+'</a>',bending,surface,pitch,teeth,weight,bore,
 			 driver.find_elements(By.TAG_NAME,'tr')[1].find_elements(By.TAG_NAME,'td')[1],driver.find_elements(By.TAG_NAME,'tr')[1].find_elements(By.TAG_NAME,'td')[2],
 			 driver.find_elements(By.TAG_NAME,'tr')[1].find_elements(By.TAG_NAME,'td')[3],driver.find_elements(By.TAG_NAME,'tr')[1].find_elements(By.TAG_NAME,'td')[4],driver.find_elements(By.TAG_NAME,'tr')[1].find_elements(By.TAG_NAME,'td')[5]]
 
@@ -87,21 +87,21 @@ if __name__ == "__main__":
 	print("Starting...")
 	# Handles multithreading based on tooth count
 	for url in urls:
-		driver.webdriver.Chrome(options=options)
-		driver.get(url)
-		teeth = len(driver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input'))
-		driver.quit()
-		drivers = [webdriver.Chrome(options=options) for _ in range(len(urls))]
-		prt = cf.ThreadPoolExecutor()
-		prt.map(grabParts,[url for _ in range(teeth)],list(range(teeth)),drivers,teeth)
-		[driver.quit() for driver in drivers]
+		tempDriver = webdriver.Chrome(options=options)
+		tempDriver.get(url)
+		teeth = len(tempDriver.find_element(By.ID, 'cds-attribute-value-list-no_teeth').find_elements(By.TAG_NAME,'input'))
+		drivers = [webdriver.Chrome(options=options) for _ in range(teeth)]
+		with cf.ThreadPoolExecutor() as prt:
+			prt.map(grabParts,[url for _ in range(teeth)],list(range(teeth)),drivers,[teeth for _ in range(teeth)])
+	
 	print("Url fetching complete!")
 
 	# Handles multithreading for data fetching
 	drivers = [webdriver.Chrome(options=options) for _ in range(len(parts))]
-	ex = cf.ThreadPoolExecutor()
-	ex.map(grabContent,parts,drivers)
+	with cf.ThreadPoolExecutor() as ex:
+		ex.map(grabContent,parts,drivers)
 
+	tempDriver.quit()
 	[driver.quit() for driver in drivers]
 	print("Data fetching complete!")
 
